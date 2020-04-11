@@ -76,8 +76,8 @@ int MP_AMG8833::updatePixelMatrix(){
 
 float parsePixel(uint8_t lsb, uint8_t msb){
     int unified_no_sign = ((msb & 7) << 8) | lsb;
-    int value = (msb & 8) > 0 ? 0 : - (1 << 11);
-    value += unified _no_sign;
+    int value = (msb & 8) == 0 ? 0 : - (1 << 11);
+    value += unified_no_sign;
     return ((float) value) / 4.0;
 }
 
@@ -91,8 +91,9 @@ int MP_AMG8833::updateThermistorTemperature(){
     //parse data
     int sign = msb & 0x08 > 0 ? -1 : 1;
     int value = ((msb & 0x07) << 4) | (lsb & 0xF0);
-    float frac = 1.0 / (float) (lsb & 0x0F);
-    this->thermistorTemperature = sign * value + frac;
+    int frac = (lsb & 0x0F);
+    float frac_temp = frac == 0 ? 0 : 1.0 / ((float) frac);
+    this->thermistorTemperature = sign * (((float) value) + frac_temp);
 
     return return MP_AMG8833_ERROR_CODE::NO_ERROR;
 }
