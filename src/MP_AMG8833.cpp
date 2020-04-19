@@ -42,6 +42,51 @@ int MP_AMG8833::getFPSMode(){
     return value & 1;
 }
 
+int MP_AMG8833::enableInterrupt(bool enable, INT_MODE mode){
+    uint8_t reg_value = ((uint8_t) mode) << 1 | enable;
+    return this->writeByte(INTERRUPT_CONTROL_REG_ADDR, value);
+}
+
+int MP_AMG8833::setInterruptThreshold(float lowThreshold, float highThreshold){
+    if (lowThreshol < MIN_THRESHOLD_TEMP || lowThreshold > MAX_THRESHOLD_TEMP ||
+        highThreshold < MIN_THRESHOLD_TEMP || highThreshold > MAX_THRESHOLD_TEMP)
+        return MP_AMG8833_ERROR_CODE::ARGUMENT_ERROR;
+
+    uint16_t lowThrRegFormat = this->to12bitFormat(lowThreshold);
+    uint16_t highThrRegFormat = this->to12bitFormat(highThreshold);
+
+    this->writeByte(INT_THR_HIGH_L_REG_ADDRESS, highThrRegFormat & 0x00FF);
+    this->writeByte(INT_THR_HIGH_H_REG_ADDRESS, highThrRegFormat & 0xFF00);
+    this->writeByte(INT_THR_LOW_L_REG_ADDRESS, lowThrRegFormat & 0x00FF);
+    return this->writeByte(INT_THR_LOW_H_REG_ADDRESS, lowThrRegFormat & 0xFF00);
+}
+
+uint16_t MP_AMG8833::to12bitFormat(float temp){
+    uint16_t value = temp >= 0? (uint16_t) (temp * 4) : (uint16_t) (-temp * 4);
+    if (temp < 0){
+        value = ~value;
+        value += 1;
+        value &= 0x0FFF;
+        value |= 0x0800;
+    }
+    return value;
+}
+
+int MP_AMG8833::updateInterruptTable(){
+    int currRowAddress = INT_TABLE_FIRST_ROW;
+    for (int rowIndex = 0; rowIndex < 8; rowIndex++){
+        int rowValue = this->readByte(currRowAddress);
+        if (rowValue < 0)
+            return rowValue;
+        for (int colIndex = 0; colIndex < 8; colIndex++)
+            this->interruptTable[rowIndex][colIndex] = rowValue & (1 << colIndex) > 0;
+        currRowAddress++;
+    }
+    return MP_AMG8833_ERROR_CODE::NO_ERROR;
+}
+
+
+
 int MP_AMG8833::updatePixelMatrix(){
     Wire.beginTransmission(this->i2cAddress);
     Wire.write(FIRST_PIXEL_REGISTER);
@@ -74,7 +119,7 @@ int MP_AMG8833::updatePixelMatrix(){
         return MP_AMG8833_ERROR_CODE::ERROR_READING;
 }
 
-float parsePixel(uint8_t lsb, uint8_t msb){
+float MP_AMG8833::parsePixel(uint8_t lsb, uint8_t msb){
     int unified_no_sign = ((msb & 7) << 8) | lsb;
     int value = (msb & 8) == 0 ? 0 : - (1 << 11);
     value += unified_no_sign;
@@ -105,4 +150,6 @@ String MP_AMG8833::getErrorDescription(int errorCode){
         return "Error reading from device";
     if (errorCode == -2)
         return "Error writing to device";
+    if (errorCode == -3)
+        return "Argument error: argument value is out of valid range";
 }
