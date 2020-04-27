@@ -1,13 +1,13 @@
-#include <MP_AMG8833.h>
+#include <Melopero_AMG8833.h>
 
-MP_AMG8833 sensor;
+Melopero_AMG8833 sensor;
 
 void setup() {
   Serial.begin(9600);
   Serial.print("Resetting sensor ... ");
   int statusCode = sensor.resetFlagsAndSettings();
   Serial.println(sensor.getErrorDescription(statusCode));
-  
+
   Serial.print("Setting FPS ... ");
   statusCode = sensor.setFPSMode(FPS_MODE::FPS_10);
   Serial.println(sensor.getErrorDescription(statusCode));
@@ -34,6 +34,6 @@ void loop() {
     }
     Serial.println();
   }
-      
+
   delay(1000);
 }

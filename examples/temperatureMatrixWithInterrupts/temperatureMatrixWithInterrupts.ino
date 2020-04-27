@@ -1,6 +1,6 @@
-#include <MP_AMG8833.h>
+#include <Melopero_AMG8833.h>
 
-MP_AMG8833 sensor;
+Melopero_AMG8833 sensor;
 
 float highThreshold = 26.5;
 float lowThreshold = 10;
@@ -10,7 +10,7 @@ void setup() {
   Serial.print("Resetting sensor ... ");
   int statusCode = sensor.resetFlagsAndSettings();
   Serial.println(sensor.getErrorDescription(statusCode));
-  
+
   Serial.print("Setting FPS ... ");
   statusCode = sensor.setFPSMode(FPS_MODE::FPS_10);
   Serial.println(sensor.getErrorDescription(statusCode));
@@ -45,11 +45,11 @@ void loop() {
   Serial.println(sensor.interruptTriggered);
 
   if (sensor.interruptTriggered){
-    
+
     Serial.print("Updating interrupt matrix ... ");
     statusCode = sensor.updateInterruptMatrix();
     Serial.println(sensor.getErrorDescription(statusCode));
-    
+
     Serial.println("Interrupt Matrix: ");
     for (int x = 0; x < 8; x++){
       for (int y = 0; y < 8; y++){
@@ -59,6 +59,6 @@ void loop() {
       Serial.println();
     }
   }
-      
+
   delay(1000);
 }
