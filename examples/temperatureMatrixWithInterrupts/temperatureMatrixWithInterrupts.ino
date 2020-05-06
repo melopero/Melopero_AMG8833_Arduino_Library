@@ -5,6 +5,13 @@ Melopero_AMG8833 sensor;
 float highThreshold = 26.5;
 float lowThreshold = 10;
 
+bool interruptOccurred = false;
+const byte interruptPin = 2;
+
+void onInterrupt(){
+  interruptOccurred = true;
+}
+
 void setup() {
   Serial.begin(9600);
   Serial.print("Resetting sensor ... ");
@@ -26,6 +33,9 @@ void setup() {
   Serial.print("Enabling interrupt ... ");
   statusCode = sensor.enableInterrupt();
   Serial.println(sensor.getErrorDescription(statusCode));
+
+  pinMode(interruptPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(interruptPin), onInterrupt, CHANGE);
 }
 
 void loop() {
@@ -33,19 +43,16 @@ void loop() {
   int statusCode = sensor.updateThermistorTemperature();
   Serial.println(sensor.getErrorDescription(statusCode));
 
-  Serial.print("Updating status ... ");
-  statusCode = sensor.updateStatus();
-  Serial.println(sensor.getErrorDescription(statusCode));
-
   Serial.print("Thermistor temp: ");
   Serial.print(sensor.thermistorTemperature);
   Serial.println("°C");
 
-  Serial.print("Interrupt triggered : ");
-  Serial.println(sensor.interruptTriggered);
+  
 
-  if (sensor.interruptTriggered){
-
+  if (interruptOccurred){
+    interruptOccurred = false;
+    Serial.println("Interrupt triggered!");
+    
     Serial.print("Updating interrupt matrix ... ");
     statusCode = sensor.updateInterruptMatrix();
     Serial.println(sensor.getErrorDescription(statusCode));

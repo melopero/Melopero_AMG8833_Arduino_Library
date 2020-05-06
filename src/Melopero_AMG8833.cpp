@@ -36,7 +36,7 @@ int Melopero_AMG8833::writeByte(uint8_t registerAddress, uint8_t value){
 Note:
     Writing operations in Sleep mode are not permitted. Just the set_mode to NORMAL_MODE is permitted.
     Reading operations in Sleep mode are not permitted.*/
-int Melopero_AMG8833::setMode(DEVICE_MODE mode = DEVICE_MODE::NORMAL){
+int Melopero_AMG8833::setMode(DEVICE_MODE mode){
     return this->writeByte(MODE_REG_ADDR, (uint8_t) mode);
 }
 
