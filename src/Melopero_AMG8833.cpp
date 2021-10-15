@@ -1,34 +1,37 @@
 //Author: Leonardo La Rocca
 #include "Melopero_AMG8833.h"
-#include "Wire.h"
 
-Melopero_AMG8833::Melopero_AMG8833(uint8_t i2cAddr){
+Melopero_AMG8833::Melopero_AMG8833(){
+}
+
+int Melopero_AMG8833::initI2C(uint8_t i2cAddr, TwoWire &bus){
     this->i2cAddress = i2cAddr;
-    Wire.begin();
+    this->i2c = &bus;
+    return (int) Melopero_AMG8833_ERROR_CODE::NO_ERROR;
 }
 
 int Melopero_AMG8833::readByte(uint8_t registerAddress){
-    Wire.beginTransmission(this->i2cAddress);
-    Wire.write(registerAddress);
-    if (Wire.endTransmission(false) != 0)
+    this->i2c->beginTransmission(this->i2cAddress);
+    this->i2c->write(registerAddress);
+    if (this->i2c->endTransmission(false) != 0)
         return (int) Melopero_AMG8833_ERROR_CODE::ERROR_READING;
 
-    Wire.requestFrom(this->i2cAddress, 1);
-    if (Wire.available())
-        return Wire.read();
+    this->i2c->requestFrom(this->i2cAddress, 1);
+    if (this->i2c->available())
+        return this->i2c->read();
     else
         return (int) Melopero_AMG8833_ERROR_CODE::ERROR_READING;
 }
 
 int Melopero_AMG8833::writeByte(uint8_t registerAddress, uint8_t value){
-    Wire.beginTransmission(this->i2cAddress);
-    if (Wire.endTransmission(false) != 0)
+    this->i2c->beginTransmission(this->i2cAddress);
+    if (this->i2c->endTransmission(false) != 0)
         return (int) Melopero_AMG8833_ERROR_CODE::ERROR_WRITING;
 
-    Wire.beginTransmission(this->i2cAddress);
-    Wire.write(registerAddress);
-    Wire.write(value);
-    Wire.endTransmission();
+    this->i2c->beginTransmission(this->i2cAddress);
+    this->i2c->write(registerAddress);
+    this->i2c->write(value);
+    this->i2c->endTransmission();
     return (int) Melopero_AMG8833_ERROR_CODE::NO_ERROR;
 }
 
@@ -179,4 +182,6 @@ String Melopero_AMG8833::getErrorDescription(int errorCode){
         return "Error writing to device";
     if (errorCode == -3)
         return "Argument error: argument value is out of valid range";
+    
+    return "Unknown Error";
 }

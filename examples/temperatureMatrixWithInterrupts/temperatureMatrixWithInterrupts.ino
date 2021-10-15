@@ -35,6 +35,13 @@ void setup() {
   //Serial communication settigs...
   Serial.begin(9600);
 
+  // initializing I2C to use default address AMG8833_I2C_ADDRESS_B and Wire (I2C-0):
+  Wire.begin();
+  sensor.initI2C();
+  // To use Wire1 (I2C-1):
+  // Wire1.begin();
+  // sensor.initI2C(AMG8833_I2C_ADDRESS_B, Wire1);
+
   //Reset the device flags and settings and read the returned status code.
   Serial.print("Resetting sensor ... ");
   int statusCode = sensor.resetFlagsAndSettings();

@@ -3,9 +3,10 @@
 #define Melopero_AMG8833_H_INCLUDED
 
 #include "Arduino.h"
+#include "Wire.h"
 
-#define I2C_ADDRESS_A 0x68
-#define I2C_ADDRESS_B 0x69
+#define AMG8833_I2C_ADDRESS_A 0x68
+#define AMG8833_I2C_ADDRESS_B 0x69
 
 #define MODE_REG_ADDR 0x00
 #define RESET_REG_ADDR 0x01
@@ -63,6 +64,7 @@ enum class Melopero_AMG8833_ERROR_CODE : int {
 class Melopero_AMG8833 {
     //Members
     public:
+        TwoWire *i2c;
         uint8_t i2cAddress;
         uint8_t bus;
 
@@ -77,7 +79,9 @@ class Melopero_AMG8833 {
 
     //Methods
     public:
-        Melopero_AMG8833(uint8_t i2cAddr = I2C_ADDRESS_B);
+        Melopero_AMG8833();
+
+        int initI2C(uint8_t i2cAddr = AMG8833_I2C_ADDRESS_B, TwoWire &bus = Wire);
 
         int readByte(uint8_t registerAddress);
         int writeByte(uint8_t registerAddress, uint8_t value);
